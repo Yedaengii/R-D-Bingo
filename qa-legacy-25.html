@@ -1,0 +1,1178 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#070D18">
+<meta name="color-scheme" content="dark">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="format-detection" content="telephone=no,date=no,address=no,email=no">
+<meta name="description" content="R&D전략 송년회 전원 참여 5×5 번호 빙고">
+<title>R&D전략 송년회 빙고</title>
+<style>
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{height:100%;margin:0;padding:0}
+  :root{color-scheme:dark}
+  body{
+    background:
+      radial-gradient(120% 78% at 50% -12%, rgba(244,119,37,.22), rgba(244,119,37,0) 62%),
+      radial-gradient(95% 62% at 8% 112%, rgba(234,0,44,.20), rgba(234,0,44,0) 62%),
+      #070D18;
+    color:#F2F5FA;
+    font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",system-ui,Roboto,"Helvetica Neue",Arial,sans-serif;
+    overflow:hidden;
+    -webkit-user-select:none;user-select:none;-webkit-touch-callout:none;
+    -webkit-text-size-adjust:100%;
+  }
+  .app{
+    position:fixed;left:0;right:0;top:0;height:100vh;height:100dvh;max-width:600px;margin:0 auto;
+    display:flex;flex-direction:column;
+    padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+  }
+
+  /* ── header ───────────────────────────── */
+  .hd{flex:0 0 auto;padding:10px 14px 4px}
+  .hd-row{display:flex;align-items:flex-start;gap:10px}
+  .hd-text{flex:1 1 auto;min-width:0}
+  .title{margin:0;font-size:clamp(14px,4.1vw,18px);font-weight:800;letter-spacing:-.03em;line-height:1.32;word-break:keep-all}
+  .t-grad{background:linear-gradient(92deg,#FF6A3D 0%,#F47725 48%,#FFC46B 100%);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .sub{margin:4px 0 0;font-size:11px;font-weight:600;color:#8FA0B8;letter-spacing:.01em;word-break:keep-all}
+  .icon-btn{
+    flex:0 0 auto;width:34px;height:34px;border-radius:11px;border:1px solid rgba(255,255,255,.13);
+    background:rgba(255,255,255,.06);color:#fff;font-size:15px;line-height:1;padding:0;
+    display:flex;align-items:center;justify-content:center;font-family:inherit;
+    touch-action:manipulation;appearance:none;-webkit-appearance:none;
+  }
+  .icon-btn:active{background:rgba(255,255,255,.16)}
+
+  .hud{display:flex;align-items:center;justify-content:flex-end;gap:8px;margin-top:9px}
+  .step{
+    width:30px;height:30px;border-radius:50%;border:0;padding:0;
+    background:rgba(255,255,255,.09);color:#E8EEF7;font-family:inherit;
+    font-size:17px;font-weight:800;line-height:1;
+    display:flex;align-items:center;justify-content:center;
+    touch-action:manipulation;appearance:none;-webkit-appearance:none;
+  }
+  .step:active{background:rgba(255,255,255,.2)}
+  .badge{
+    margin-left:auto;display:flex;flex-direction:column;align-items:center;gap:3px;
+    padding:3px 11px 5px;border-radius:14px;
+    border:1px solid rgba(244,119,37,.32);
+    background:linear-gradient(180deg,rgba(244,119,37,.17),rgba(234,0,44,.10));
+    transition:border-color .25s ease,box-shadow .25s ease;
+  }
+  .badge-row{display:flex;align-items:baseline;gap:4px;line-height:1}
+  .badge .num{font-size:19px;font-weight:900;line-height:1;color:#FFB877;letter-spacing:-.03em;font-variant-numeric:tabular-nums}
+  .badge .tot{font-size:11px;font-weight:800;color:#93A2B8;line-height:1}
+  .badge .lbl{font-size:10px;font-weight:800;color:#9FB0C6;letter-spacing:.02em}
+  .badge .dots{display:flex;gap:3px}
+  .badge .dots i{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.18);transition:background .2s ease,transform .2s ease}
+  .badge .dots i.fill{background:#FFD166;transform:scale(1.12)}
+  .badge.two .num{color:#FFCE8A}
+  .badge.win{
+    border-color:rgba(255,209,102,.72);
+    background:linear-gradient(180deg,rgba(255,209,102,.24),rgba(244,119,37,.16));
+    box-shadow:0 0 18px rgba(255,209,102,.35);
+    animation:badgePulse 1.7s ease-in-out infinite;
+  }
+  @keyframes badgePulse{0%,100%{box-shadow:0 0 12px rgba(255,209,102,.25)}50%{box-shadow:0 0 24px rgba(255,209,102,.6)}}
+
+  /* ── board ────────────────────────────── */
+  .stage{flex:1 1 auto;min-height:0;display:flex;align-items:center;justify-content:center;padding:6px 12px}
+  .board{
+    display:grid;grid-template-columns:repeat(5,1fr);grid-template-rows:repeat(5,1fr);
+    gap:clamp(4px,1.5vw,7px);
+    width:min(calc(100vw - 24px),576px,58vh);
+    height:min(calc(100vw - 24px),576px,58vh);
+    width:min(calc(100vw - 24px),576px,58dvh);
+    height:min(calc(100vw - 24px),576px,58dvh);
+  }
+  .preview-guide{
+    grid-column:1 / -1;grid-row:1 / -1;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;
+    padding:20px;text-align:center;border-radius:16px;
+    border:1px dashed rgba(255,255,255,.22);background:rgba(255,255,255,.04);
+    color:#D7E0EC;font-size:13px;line-height:1.6;word-break:keep-all;
+  }
+  .preview-guide b{color:#FFB877}
+  .cell{
+    position:relative;display:flex;align-items:center;justify-content:center;
+    min-width:0;min-height:0;padding:4px;overflow:hidden;
+    border-radius:13px;border:1px solid rgba(255,255,255,.10);
+    background:linear-gradient(180deg,rgba(255,255,255,.075),rgba(255,255,255,.036));
+    color:#E6EDF7;font-family:inherit;font-weight:700;line-height:1.14;letter-spacing:-.02em;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.06);
+    touch-action:manipulation;appearance:none;-webkit-appearance:none;
+    transition:transform .12s ease,background .18s ease,border-color .18s ease,color .18s ease,box-shadow .18s ease;
+  }
+  .cell .w{display:block;width:100%;text-align:center}
+  .cell .w.n{
+    font-size:26px;font-weight:900;line-height:1;
+    letter-spacing:-.045em;font-variant-numeric:tabular-nums;
+    font-feature-settings:"tnum" 1;
+  }
+  .cell:active{transform:scale(.95)}
+  .cell.on{
+    background:linear-gradient(155deg,#F47725 0%,#EA002C 78%);
+    border-color:rgba(255,255,255,.34);color:#fff;
+    box-shadow:0 6px 16px -7px rgba(234,0,44,.9),inset 0 1px 0 rgba(255,255,255,.35);
+  }
+  .cell.on::after{
+    content:"✓";position:absolute;top:3px;right:5px;
+    font-size:10px;font-weight:900;line-height:1;opacity:.92;
+  }
+  .cell.line{border-color:#FFD166;box-shadow:0 0 0 1px #FFD166,0 0 14px rgba(255,209,102,.42)}
+  .cell.line.on{background:linear-gradient(155deg,#FFA23A 0%,#EA002C 80%)}
+  .cell.pop{animation:pop .34s ease}
+  @keyframes pop{0%{transform:scale(1)}45%{transform:scale(1.08)}100%{transform:scale(1)}}
+
+  /* ── footer ───────────────────────────── */
+  .ft{flex:0 0 auto;display:flex;align-items:center;gap:6px;padding:4px 14px 10px}
+  .shuffle{
+    display:flex;align-items:center;gap:6px;padding:9px 14px;border-radius:999px;
+    border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.06);color:#E9EFF8;
+    font-family:inherit;font-size:12.5px;font-weight:800;line-height:1;
+    touch-action:manipulation;appearance:none;-webkit-appearance:none;
+  }
+  .shuffle:active{background:rgba(255,255,255,.15)}
+  .shuffle.locked{
+    color:#8FA0B8;background:rgba(255,255,255,.03);border-color:rgba(255,255,255,.08);
+    box-shadow:none;cursor:default;
+  }
+  .shuffle.locked:active{background:rgba(255,255,255,.06)}
+  .shuffle.lockhint{animation:lockNudge .36s ease}
+  @keyframes lockNudge{0%{transform:translateX(0)}25%{transform:translateX(-3px)}55%{transform:translateX(3px)}80%{transform:translateX(-2px)}100%{transform:translateX(0)}}
+  .linkbtn{
+    border:0;background:transparent;color:#8FA0B8;font-family:inherit;
+    font-size:11.5px;font-weight:700;padding:8px 4px;line-height:1;
+  }
+  .setcode{margin-left:auto;font-size:10px;font-weight:700;letter-spacing:.06em;color:#5E6E86;font-variant-numeric:tabular-nums}
+
+  /* ── toast ────────────────────────────── */
+  .toast{
+    position:fixed;left:50%;top:calc(env(safe-area-inset-top) + 10px);z-index:50;
+    transform:translate(-50%,-16px);max-width:92vw;
+    padding:11px 18px;border-radius:15px;text-align:center;pointer-events:none;
+    background:linear-gradient(180deg,rgba(24,37,58,.98),rgba(13,22,38,.98));
+    border:1px solid rgba(255,209,102,.45);
+    box-shadow:0 16px 38px rgba(0,0,0,.55);
+    opacity:0;transition:opacity .25s ease,transform .28s cubic-bezier(.2,.9,.3,1);
+  }
+  .toast.show{opacity:1;transform:translate(-50%,0)}
+  .toast[hidden]{display:none}
+  .toast-main{font-size:14px;font-weight:900;letter-spacing:-.02em;color:#fff}
+  .toast-sub{margin-top:3px;font-size:11px;font-weight:700;color:#FFD9A8}
+
+  .fx{position:fixed;left:0;top:0;width:100%;height:100%;z-index:45;pointer-events:none}
+
+  /* ── modals ───────────────────────────── */
+  .modal{
+    position:fixed;left:0;right:0;top:0;bottom:0;z-index:40;
+    display:flex;align-items:center;justify-content:center;padding:14px;
+    background:rgba(4,8,16,.74);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);
+  }
+  .modal[hidden]{display:none}
+  .sheet{
+    width:100%;max-width:480px;max-height:88vh;overflow:auto;overscroll-behavior:contain;
+    padding:16px;border-radius:18px;border:1px solid rgba(255,255,255,.12);
+    background:#0E1828;box-shadow:0 24px 60px rgba(0,0,0,.6);
+    animation:sheetIn .2s ease;
+  }
+  @keyframes sheetIn{from{transform:translateY(14px);opacity:0}to{transform:translateY(0);opacity:1}}
+  .m-hd{display:flex;align-items:center;justify-content:space-between;gap:10px}
+  .m-hd h2{margin:0;font-size:15px;font-weight:800;letter-spacing:-.02em}
+  .x{
+    width:28px;height:28px;border-radius:9px;border:0;padding:0;
+    background:rgba(255,255,255,.08);color:#C9D4E4;font-family:inherit;font-size:13px;line-height:1;
+    display:flex;align-items:center;justify-content:center;
+  }
+  .m-desc{margin:8px 0 10px;font-size:11.5px;line-height:1.6;color:#93A2B8;word-break:keep-all}
+  .m-desc b{color:#FFD9A8;font-weight:800}
+  .goal-row{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:10px 0 0}
+  .goal-lbl{font-size:11.5px;font-weight:800;color:#C9D4E4;letter-spacing:-.01em}
+  .seg{display:flex;padding:3px;border-radius:999px;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.05)}
+  .seg-btn{
+    min-width:66px;padding:8px 10px;border-radius:999px;border:0;background:transparent;
+    color:#9FB0C6;font-family:inherit;font-size:12px;font-weight:800;line-height:1;
+    touch-action:manipulation;appearance:none;-webkit-appearance:none;
+    transition:background .18s ease,color .18s ease,box-shadow .18s ease;
+  }
+  .seg-btn[aria-pressed="true"]{
+    color:#fff;background:linear-gradient(96deg,#EA002C,#F47725);
+    box-shadow:0 8px 18px -12px rgba(234,0,44,.95);
+  }
+  .range-row{
+    display:flex;align-items:center;justify-content:center;gap:14px;
+    margin:12px 0 6px;
+  }
+  .step.big{
+    width:46px;height:46px;border-radius:15px;font-size:22px;
+    border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.07);
+  }
+  .range-field{display:flex;flex-direction:column;align-items:center;gap:2px}
+  #maxInput{
+    width:104px;padding:6px 4px;border-radius:12px;text-align:center;
+    border:1px solid rgba(255,255,255,.14);background:#080F1B;color:#FFD9A8;
+    font-family:inherit;font-size:28px;font-weight:900;line-height:1.2;outline:none;
+    font-variant-numeric:tabular-nums;
+  }
+  #maxInput:focus{border-color:rgba(244,119,37,.62);box-shadow:0 0 0 3px rgba(244,119,37,.15)}
+  .range-cap{font-size:10px;font-weight:700;color:#7E8DA4}
+  .m-meta{display:flex;justify-content:space-between;gap:8px;margin:7px 2px 10px;font-size:11px;font-weight:700;color:#8FA0B8}
+  .m-meta .warn{color:#FFB4A8}
+  .m-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .btn{
+    font-family:inherit;font-size:12.5px;font-weight:800;line-height:1.15;
+    padding:11px 10px;border-radius:12px;border:1px solid rgba(255,255,255,.14);
+    background:rgba(255,255,255,.06);color:#EAF0F9;
+    touch-action:manipulation;appearance:none;-webkit-appearance:none;
+  }
+  .btn:active{background:rgba(255,255,255,.14)}
+  .btn.primary{
+    grid-column:1/-1;border:0;color:#fff;
+    background:linear-gradient(96deg,#EA002C,#F47725);
+    box-shadow:0 10px 22px -12px rgba(234,0,44,.95);
+  }
+  .btn.wide{grid-column:1/-1}
+  .btn.ghost{grid-column:1/-1;background:transparent;color:#8FA0B8;border-color:rgba(255,255,255,.1)}
+  .btn:disabled{opacity:.42}
+  .m-share{margin-top:12px}
+  .m-share label{display:block;margin-bottom:5px;font-size:10.5px;font-weight:800;letter-spacing:.03em;color:#8FA0B8}
+  .m-note{margin:7px 2px 0;font-size:10.5px;line-height:1.55;color:#7E8DA4;word-break:keep-all}
+  .m-note b{color:#9FB0C6}
+  #linkOut{
+    display:block;width:100%;padding:10px 11px;border-radius:10px;
+    border:1px solid rgba(255,255,255,.12);background:#080F1B;color:#9CD3FF;
+    font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:11px;outline:none;
+  }
+  .rules{margin:6px 0 10px;padding-left:18px;font-size:12px;line-height:1.7;color:#D7E0EC;word-break:keep-all}
+  .rules li{margin-bottom:5px}
+  .rules b{color:#FFD9A8}
+  .noscript{padding:24px;font-size:14px;line-height:1.6}
+
+  @media (max-height:620px){
+    .hd{padding-top:6px}
+    .title{font-size:13.5px}
+    .sub{font-size:10px}
+    .stage{padding:4px 10px}
+  }
+</style>
+</head>
+<body>
+
+<div class="app" id="app">
+  <header class="hd">
+    <div class="hd-row">
+      <div class="hd-text">
+        <h1 class="title"><span class="t-grad">R&amp;D전략</span> 송년회 빙고</h1>
+        <p class="sub">전원 참여 · 5×5 번호 빙고</p>
+      </div>
+      <button class="icon-btn" id="btnEdit" type="button" aria-label="설정">⚙️</button>
+    </div>
+    <div class="hud">
+      <div class="badge" id="badge" aria-live="polite">
+        <div class="badge-row">
+          <span class="num" id="bingoNum">0</span>
+          <span class="tot" id="bingoGoal">/ 3</span>
+          <span class="lbl">빙고</span>
+        </div>
+        <span class="dots" id="dots"><i></i><i></i><i></i></span>
+      </div>
+    </div>
+  </header>
+
+  <main class="stage" id="stage">
+    <div class="board" id="board" role="group" aria-label="5x5 번호 빙고판">
+      <div class="preview-guide">
+        <div><b>📱 파일 미리보기 화면에서는<br>빙고판이 작동하지 않아요!</b></div>
+        <div>오른쪽 아래 <b>공유 버튼(□↑)</b>을 눌러<br><b>Safari로 열기</b> 또는 웹 링크로 열어 주세요.</div>
+      </div>
+    </div>
+  </main>
+
+  <footer class="ft">
+    <button class="shuffle" id="btnShuffle" type="button">🔄 새 판 섞기</button>
+    <button class="linkbtn" id="btnHelp" type="button">❓ 진행 방법</button>
+    <span class="setcode" id="setCode">1~22번</span>
+  </footer>
+</div>
+
+<div class="toast" id="toast" hidden aria-live="assertive">
+  <div class="toast-main" id="toastMain"></div>
+  <div class="toast-sub" id="toastSub"></div>
+</div>
+
+<canvas class="fx" id="fx" aria-hidden="true"></canvas>
+
+<!-- 번호 범위 설정 -->
+<div class="modal" id="modal" hidden>
+  <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="mTitle">
+    <div class="m-hd">
+      <h2 id="mTitle">설정</h2>
+      <button class="x" id="btnCloseEdit" type="button" aria-label="닫기">✕</button>
+    </div>
+    <div class="goal-row">
+      <span class="goal-lbl">목표 빙고 수</span>
+      <div class="seg" id="goalSeg" role="group" aria-label="목표 빙고 수">
+        <button class="seg-btn" type="button" data-goal="2" aria-pressed="false">2빙고</button>
+        <button class="seg-btn" type="button" data-goal="3" aria-pressed="true">3빙고</button>
+      </div>
+    </div>
+    <p class="m-desc">먼저 <b>목표 빙고</b>를 달성한 사람이 나오면 그 테이블 <b>전원 승리</b>예요. 최대 번호를 정하면 <b>1 ~ N</b> 안에서 숫자 <b>25개</b>를 무작위로 골라 5×5 칸에 배치합니다. 사람마다 배치가 달라도 범위가 같으면 같은 게임입니다.</p>
+    <div class="range-row">
+      <button class="step big" id="btnMaxMinus" type="button" aria-label="최대 번호 줄이기">−</button>
+      <span class="range-field">
+        <input id="maxInput" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="2" autocomplete="off" aria-label="최대 번호">
+        <span class="range-cap">최대 번호 (25~99)</span>
+      </span>
+      <button class="step big" id="btnMaxPlus" type="button" aria-label="최대 번호 늘리기">+</button>
+    </div>
+    <div class="m-meta"><span id="rangeInfo">1 ~ 25</span><span id="rangeWarn" class="warn"></span></div>
+    <div class="m-actions">
+      <button class="btn primary" id="btnApply" type="button">적용하고 섞기</button>
+      <button class="btn wide" id="btnCopyLink" type="button">🔗 공유 링크 복사</button>
+      <button class="btn ghost" id="btnClearMarks" type="button" hidden>🧽 체크 모두 해제 (고정 풀기)</button>
+      <button class="btn ghost" id="btnResetMax" type="button">기본값(25)으로</button>
+    </div>
+    <div class="m-share">
+      <label for="linkOut">공유 링크 (같은 번호 범위로 각자 다른 판)</label>
+      <input id="linkOut" type="text" readonly>
+      <p class="m-note" id="linkNote"></p>
+    </div>
+  </div>
+</div>
+
+<!-- 진행 방법 -->
+<div class="modal" id="helpModal" hidden>
+  <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="hTitle">
+    <div class="m-hd">
+      <h2 id="hTitle">진행 방법</h2>
+      <button class="x" id="btnCloseHelp" type="button" aria-label="닫기">✕</button>
+    </div>
+    <ol class="rules">
+      <li>참석자 모두 <b>각자 폰으로</b> 접속해 주세요.</li>
+      <li>사회자가 번호를 부르면 해당 칸을 <b>터치</b>해 체크하세요. 다시 누르면 해제됩니다.</li>
+      <li>가로·세로·대각선 <b>5칸</b>을 완성하면 <b>1빙고</b>, 먼저 목표 빙고를 달성하면 <b>손을 들어 주세요</b> — <b>우승자가 나온 테이블 전원 승리!</b></li>
+    </ol>
+    <p class="m-desc">목표 빙고(<b>2빙고 / 3빙고</b>)는 <b>⚙️</b>에서 바꿀 수 있고, 아래쪽 <b>1~N번</b> 표시가 같으면 같은 범위로 진행 중이에요.<br>첫 칸을 체크하면 판이 <b>자동으로 고정</b>돼요. 그때부터는 새로고침해도 판과 체크가 그대로 남고 <b>새 판 섞기</b>가 잠깁니다. 다시 섞으려면 ⚙️의 <b>체크 모두 해제</b>로 고정을 풀어 주세요.</p>
+    <button class="btn primary" id="btnHelpOk" type="button">확인</button>
+  </div>
+</div>
+
+<noscript><div class="noscript">이 빙고판은 자바스크립트가 필요합니다. 브라우저에서 자바스크립트를 허용한 뒤 다시 열어 주세요.</div></noscript>
+
+<script>
+(function () {
+  'use strict';
+
+  /* ────────────── 기본 설정 ────────────── */
+  var DEFAULT_MAX = 25;   /* 기본 최대 번호 (1 ~ 25) */
+  var MIN_MAX = 25;       /* 최소 25 (25칸을 채우려면 필요) */
+  var MAX_MAX = 99;
+  var CELLS = 25;
+  var DEFAULT_GOAL = 3;   /* 기본 3빙고 우승 (설정에서 2빙고로 전환) */
+  var LS_KEY = 'rnd-num-bingo-v2';
+
+  /* ────────────── 빙고 12줄 (가로5·세로5·대각선2) ────────────── */
+  var LINES = [
+    [0, 1, 2, 3, 4], [5, 6, 7, 8, 9], [10, 11, 12, 13, 14],
+    [15, 16, 17, 18, 19], [20, 21, 22, 23, 24],
+    [0, 5, 10, 15, 20], [1, 6, 11, 16, 21], [2, 7, 12, 17, 22],
+    [3, 8, 13, 18, 23], [4, 9, 14, 19, 24],
+    [0, 6, 12, 18, 24], [4, 8, 12, 16, 20]
+  ];
+
+  var state = {
+    maxNum: DEFAULT_MAX,
+    goal: DEFAULT_GOAL,
+    board: [],
+    marks: [],
+    celebrated: [],
+    cellEls: [],
+    count: 0
+  };
+  var refs = {};
+  var confettiParts = [];
+  var confettiRaf = 0;
+  var resizeTimer = 0;
+  var toastTimer = 0;
+  var toastHideTimer = 0;
+  var saveWarned = false;
+
+  /* ────────────── 유틸 ────────────── */
+  function byId(id) { return document.getElementById(id); }
+
+  function clampMax(n) {
+    n = Math.floor(Number(n));
+    if (isNaN(n)) n = DEFAULT_MAX;
+    if (n < MIN_MAX) n = MIN_MAX;
+    if (n > MAX_MAX) n = MAX_MAX;
+    return n;
+  }
+
+  function shuffleArray(arr) {
+    for (var i = arr.length - 1; i > 0; i--) {
+      var j = Math.floor(Math.random() * (i + 1));
+      var t = arr[i]; arr[i] = arr[j]; arr[j] = t;
+    }
+    return arr;
+  }
+
+  /* 1 ~ maxNum 중 서로 다른 25개를 뽑아 배치 */
+  function makeBoard(maxNum) {
+    var pool = [], i;
+    for (i = 1; i <= maxNum; i++) pool.push(i);
+    shuffleArray(pool);
+    return pool.slice(0, CELLS);
+  }
+
+  function rangeLabel(maxNum) {
+    return '1~' + (maxNum || state.maxNum) + '번';
+  }
+
+  /* URL 해시: #n=25 또는 #n=25&g=2 */
+  function readHash() {
+    var h = String((window.location && window.location.hash) || '').replace(/^#/, '');
+    if (!h) return null;
+    var out = { maxNum: null, goal: null };
+    var mn = /(?:^|&)n=(\d{1,2})/.exec(h);
+    if (mn) {
+      var n = parseInt(mn[1], 10);
+      if (!isNaN(n)) out.maxNum = clampMax(n);
+    }
+    var mg = /(?:^|&)g=(\d{1,2})/.exec(h);
+    if (mg) {
+      var g = parseInt(mg[1], 10);
+      if (g === 2 || g === 3) out.goal = g;
+    }
+    if (out.maxNum === null && out.goal === null) return null;
+    return out;
+  }
+
+  /* ────────────── 저장 ────────────── */
+  function loadSaved() {
+    try {
+      var raw = window.localStorage.getItem(LS_KEY);
+      if (!raw) return null;
+      var obj = JSON.parse(raw);
+      return (obj && typeof obj === 'object') ? obj : null;
+    } catch (e) { return null; }
+  }
+
+  function save() {
+    try {
+      window.localStorage.setItem(LS_KEY, JSON.stringify({
+        v: 2,
+        maxNum: state.maxNum,
+        goal: state.goal,
+        board: state.board,
+        marks: state.marks,
+        celebrated: state.celebrated
+      }));
+      return true;
+    } catch (e) {
+      /* 사생활 보호 모드 등: 저장이 안 되면 새로고침 시 판이 사라지므로 한 번만 미리 알린다 */
+      if (!saveWarned) {
+        saveWarned = true;
+        setTimeout(function () {
+          toast('이 브라우저엔 판이 저장되지 않아요', '시크릿·사생활 보호 모드에서는 새로고침하면 체크가 지워집니다');
+        }, 500);
+      }
+      return false;
+    }
+  }
+
+  /* ────────────── 그리기 ────────────── */
+  function renderBoard() {
+    var boardEl = refs.board;
+    if (!boardEl) return;
+    boardEl.textContent = '';
+    state.cellEls = [];
+    for (var i = 0; i < CELLS; i++) {
+      var btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'cell';
+      btn.setAttribute('data-i', String(i));
+      btn.setAttribute('aria-pressed', 'false');
+      btn.setAttribute('aria-label', (i + 1) + '번째 칸 ' + (state.board[i] == null ? '' : state.board[i]));
+      var span = document.createElement('span');
+      span.className = 'w n';
+      span.textContent = (state.board[i] == null ? '' : String(state.board[i]));
+      btn.appendChild(span);
+      bindCell(btn, i);
+      boardEl.appendChild(btn);
+      state.cellEls.push(btn);
+    }
+    paintMarks();
+    fitBoard();
+  }
+
+  function bindCell(btn, idx) {
+    btn.addEventListener('click', function () { toggleCell(idx); });
+  }
+
+  function paintMarks() {
+    for (var i = 0; i < CELLS; i++) {
+      var btn = state.cellEls[i];
+      if (!btn) continue;
+      var on = state.marks.indexOf(i) >= 0;
+      btn.classList.toggle('on', on);
+      btn.setAttribute('aria-pressed', on ? 'true' : 'false');
+    }
+    updateLockUI();
+  }
+
+  /* ────────────── 판 고정 (첫 칸 체크 ~ 모두 해제) ────────────── */
+  function isLocked() { return state.marks.length > 0; }
+
+  function updateLockUI() {
+    var locked = isLocked();
+    if (refs.btnShuffle) {
+      refs.btnShuffle.classList.toggle('locked', locked);
+      refs.btnShuffle.setAttribute('aria-disabled', locked ? 'true' : 'false');
+      refs.btnShuffle.textContent = locked ? '🔒 판 고정됨' : '🔄 새 판 섞기';
+      refs.btnShuffle.setAttribute('title', locked
+        ? '체크한 칸이 있어 판이 고정되어 있어요. 모두 해제하면 다시 섞을 수 있어요.'
+        : '새 판을 섞습니다');
+    }
+    if (refs.btnClearMarks) {
+      if (locked) {
+        refs.btnClearMarks.removeAttribute('hidden');
+        refs.btnClearMarks.textContent = '🧽 체크 ' + state.marks.length + '칸 모두 해제 (고정 풀기)';
+      } else {
+        refs.btnClearMarks.setAttribute('hidden', '');
+      }
+    }
+    updateSetCode();
+  }
+
+  function lockNotice() {
+    toast('판이 고정되어 있어요', '체크 ' + state.marks.length + '칸을 모두 해제하면 새 판을 섞을 수 있어요');
+    if (refs.btnShuffle) {
+      refs.btnShuffle.classList.remove('lockhint');
+      void refs.btnShuffle.offsetWidth;
+      refs.btnShuffle.classList.add('lockhint');
+    }
+    buzz(8);
+  }
+
+  function clearMarks() {
+    if (!isLocked()) return;
+    var n = state.marks.length;
+    if (!window.confirm('체크한 ' + n + '칸을 모두 해제할까요?\n번호 배치는 그대로 남습니다.')) return;
+    state.marks = [];
+    state.celebrated = [];
+    state.count = 0;
+    paintMarks();
+    updateLines();
+    save();
+    toast('체크를 모두 해제했어요', '번호 판은 그대로 · 이제 새 판을 섞을 수 있어요');
+  }
+
+  function fitBoard() {
+    var st = refs.stage, b = refs.board;
+    if (!st || !b) return;
+    var w = (st.clientWidth || 0) - 24;
+    var h = (st.clientHeight || 0) - 6;
+    if (!(w > 0) || !(h > 0)) return;
+    var side = Math.floor(Math.min(w, h));
+    if (side < 180) side = 180;
+    b.style.width = side + 'px';
+    b.style.height = side + 'px';
+    fitCellNumbers();
+  }
+
+  /* 숫자 한 칸: 칸 크기에 맞춰 크고 또렷하게 (대략 24~36px) */
+  function fitCellNumbers() {
+    var n = state.cellEls.length;
+    if (!n) return;
+    var first = state.cellEls[0];
+    var cw = first.clientWidth || 0;
+    var ch = first.clientHeight || 0;
+    if (!cw) return;
+    var side = (ch > 0 && ch < cw) ? ch : cw;
+    var fs = Math.round(side * 0.44);
+    if (fs > 34) fs = 34;
+    if (fs < 18) fs = 18;
+    for (var i = 0; i < n; i++) {
+      var sp = state.cellEls[i].firstChild;
+      if (sp) sp.style.fontSize = fs + 'px';
+    }
+  }
+
+  /* ────────────── 빙고 계산 ────────────── */
+  function computeLines() {
+    var on = {}, out = [];
+    for (var i = 0; i < state.marks.length; i++) on[state.marks[i]] = 1;
+    for (var l = 0; l < LINES.length; l++) {
+      var line = LINES[l], full = true;
+      for (var k = 0; k < line.length; k++) {
+        if (!on[line[k]]) { full = false; break; }
+      }
+      if (full) out.push(line);
+    }
+    return out;
+  }
+
+  function updateLines() {
+    var lines = computeLines();
+    var inLine = {};
+    for (var l = 0; l < lines.length; l++) {
+      for (var k = 0; k < lines[l].length; k++) inLine[lines[l][k]] = 1;
+    }
+    for (var i = 0; i < state.cellEls.length; i++) {
+      state.cellEls[i].classList.toggle('line', !!inLine[i]);
+    }
+    var count = lines.length;
+    state.count = count;
+    setBadge(count);
+
+    /* 한 번에 여러 줄이 완성되면 가장 높은 단계로 한 번만 축하한다 */
+    var top = Math.min(count, state.goal), newLevel = 0;
+    for (var lv = 1; lv <= top; lv++) {
+      if (state.celebrated.indexOf(lv) < 0) newLevel = lv;
+    }
+    if (newLevel > 0) {
+      for (var v = 1; v <= newLevel; v++) {
+        if (state.celebrated.indexOf(v) < 0) state.celebrated.push(v);
+      }
+      celebrate(newLevel);
+    }
+  }
+
+  function setBadge(count) {
+    if (!refs.bingoNum) return;
+    var goal = state.goal;
+    refs.bingoNum.textContent = count > goal ? goal + '+' : String(count);
+    if (refs.goalTot) refs.goalTot.textContent = '/ ' + goal;
+    refs.badge.classList.toggle('one', count >= 1);
+    refs.badge.classList.toggle('two', count >= 2);
+    refs.badge.classList.toggle('win', count >= goal);
+    var dots = (refs.dots && refs.dots.children) || [];
+    for (var i = 0; i < dots.length; i++) {
+      dots[i].classList.toggle('fill', i < Math.min(count, goal));
+    }
+  }
+
+  /* 목표 빙고 수만큼 점을 다시 그린다 */
+  function renderDots() {
+    if (!refs.dots) return;
+    refs.dots.textContent = '';
+    for (var i = 0; i < state.goal; i++) {
+      var dot = document.createElement('i');
+      refs.dots.appendChild(dot);
+    }
+    if (refs.goalTot) refs.goalTot.textContent = '/ ' + state.goal;
+  }
+
+  function toggleCell(i) {
+    if (i < 0 || i > CELLS - 1) return;
+    var p = state.marks.indexOf(i);
+    var adding = p < 0;
+    if (adding) state.marks.push(i);
+    else state.marks.splice(p, 1);
+
+    var btn = state.cellEls[i];
+    if (btn && adding) {
+      btn.classList.remove('pop');
+      void btn.offsetWidth;
+      btn.classList.add('pop');
+    }
+    paintMarks();
+    if (adding) buzz(12);
+    updateLines();
+    save();
+  }
+
+  /* ────────────── 축하 ────────────── */
+  function celebrate(level) {
+    var goal = state.goal;
+    var won = level >= goal;
+    if (won) {
+      toast('🏆 ' + goal + '빙고 완성!', '손을 들어 주세요 — 테이블 전원 승리!');
+      buzz([40, 70, 40, 70, 120]);
+    } else if (level === 2) {
+      toast('🔥 2빙고!', '한 줄만 더!');
+      buzz([25, 60, 25]);
+    } else {
+      toast('🎉 1빙고 달성!', '좋아요, 계속 갑니다');
+      buzz(25);
+    }
+    confetti(won ? 3 : level);
+  }
+
+  function buzz(pattern) {
+    try {
+      if (window.navigator && typeof window.navigator.vibrate === 'function') {
+        window.navigator.vibrate(pattern);
+      }
+    } catch (e) { /* 무시 */ }
+  }
+
+  function toast(main, sub) {
+    if (!refs.toast) return;
+    refs.toastMain.textContent = main;
+    refs.toastSub.textContent = sub || '';
+    refs.toast.hidden = false;
+    void refs.toast.offsetWidth;
+    refs.toast.classList.add('show');
+    clearTimeout(toastTimer);
+    clearTimeout(toastHideTimer);
+    toastTimer = setTimeout(function () {
+      refs.toast.classList.remove('show');
+      toastHideTimer = setTimeout(function () {
+        if (!refs.toast.classList.contains('show')) refs.toast.hidden = true;
+      }, 320);
+    }, 4200);
+  }
+
+  function reducedMotion() {
+    try {
+      return !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+    } catch (e) { return false; }
+  }
+
+  function confetti(level) {
+    var cv = refs.fx;
+    if (!cv || !cv.getContext) return;
+    var ctx = cv.getContext('2d');
+    if (!ctx) return;
+    if (reducedMotion()) return;
+
+    var dpr = Math.min(window.devicePixelRatio || 1, 2);
+    var W = cv.clientWidth || window.innerWidth || 360;
+    var H = cv.clientHeight || window.innerHeight || 640;
+    cv.width = Math.round(W * dpr);
+    cv.height = Math.round(H * dpr);
+    if (ctx.setTransform) ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+    var colors = ['#EA002C', '#F47725', '#FFD166', '#FFFFFF', '#8ED8FF', '#FF9BC2'];
+    var n = level >= 3 ? 170 : (level === 2 ? 120 : 80);
+    for (var i = 0; i < n; i++) {
+      confettiParts.push({
+        x: W * (0.5 + (Math.random() - 0.5) * 0.58),
+        y: H * 0.13 + Math.random() * 30,
+        vx: (Math.random() - 0.5) * 8.6,
+        vy: -3 - Math.random() * 9,
+        w: 4 + Math.random() * 6,
+        h: 7 + Math.random() * 9,
+        rot: Math.random() * 6.283,
+        vr: (Math.random() - 0.5) * 0.32,
+        c: colors[Math.floor(Math.random() * colors.length)],
+        t: 0,
+        max: 120 + Math.random() * 70
+      });
+    }
+    if (!confettiRaf) confettiRaf = requestAnimationFrame(stepConfetti);
+  }
+
+  function stepConfetti() {
+    confettiRaf = 0;
+    var cv = refs.fx;
+    var ctx = (cv && cv.getContext) ? cv.getContext('2d') : null;
+    if (!ctx) { confettiParts = []; return; }
+
+    var W = cv.clientWidth || window.innerWidth || 360;
+    var H = cv.clientHeight || window.innerHeight || 640;
+    ctx.clearRect(0, 0, W, H);
+
+    var alive = [];
+    for (var i = 0; i < confettiParts.length; i++) {
+      var p = confettiParts[i];
+      p.t++;
+      p.vy += 0.34;
+      p.vx *= 0.995;
+      p.vy *= 0.995;
+      p.x += p.vx;
+      p.y += p.vy;
+      p.rot += p.vr;
+      if (p.y > H + 40 || p.t > p.max) continue;
+
+      var alpha = 1;
+      if (p.t > p.max - 30) {
+        alpha = (p.max - p.t) / 30;
+        if (alpha < 0) alpha = 0;
+      }
+      ctx.save();
+      ctx.globalAlpha = alpha;
+      ctx.translate(p.x, p.y);
+      ctx.rotate(p.rot);
+      ctx.fillStyle = p.c;
+      ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
+      ctx.restore();
+      alive.push(p);
+    }
+    confettiParts = alive;
+    if (alive.length) confettiRaf = requestAnimationFrame(stepConfetti);
+    else ctx.clearRect(0, 0, W, H);
+  }
+
+  /* ────────────── 새 판 / 범위·목표 적용 ────────────── */
+  function reshuffle() {
+    if (isLocked()) { lockNotice(); return; }
+    if (!window.confirm('새 판을 섞을까요?\n체크한 칸이 모두 지워집니다.')) return;
+    state.marks = [];
+    state.celebrated = [];
+    state.count = 0;
+    state.board = makeBoard(state.maxNum);
+    renderBoard();
+    setBadge(0);
+    updateLines();
+    save();
+    toast('새 판 준비 완료', rangeLabel() + '에서 25개를 다시 뽑았어요');
+  }
+
+  function applyMax(maxNum, silent, force) {
+    var n = clampMax(maxNum);
+    if (isLocked() && !force) return false;
+    state.maxNum = n;
+    state.marks = [];
+    state.celebrated = [];
+    state.count = 0;
+    state.board = makeBoard(n);
+    updateSetCode();
+    renderBoard();
+    setBadge(0);
+    updateLines();
+    save();
+    if (!silent) toast('번호 범위를 ' + rangeLabel(n) + '으로 바꿨어요', '25개 숫자를 새로 배치했습니다');
+    return true;
+  }
+
+  /* 목표 빙고 수 전환 (2 또는 3) */
+  function applyGoal(g, silent) {
+    var goal = (Number(g) === 2) ? 2 : 3;
+    state.goal = goal;
+    renderDots();
+    /* 이미 지난 단계는 다시 축하하지 않고, 새로 달성한 목표만 알린다 */
+    var keep = Math.min(state.count, goal - 1);
+    state.celebrated = [];
+    for (var lv = 1; lv <= keep; lv++) state.celebrated.push(lv);
+    updateGoalUI();
+    updateSetCode();
+    updateLines();
+    save();
+    if (!silent) toast('목표 빙고를 ' + goal + '빙고로 바꿨어요', '위쪽 배지가 / ' + goal + '로 표시됩니다');
+    return true;
+  }
+
+  function updateSetCode() {
+    if (refs.setCode) refs.setCode.textContent = rangeLabel() + ' · ' + state.goal + '빙고' + (isLocked() ? ' · 🔒' : '');
+  }
+
+  function updateGoalUI() {
+    if (!refs.goalSeg) return;
+    var btns = refs.goalSeg.getElementsByTagName('button');
+    for (var i = 0; i < btns.length; i++) {
+      var g = parseInt(btns[i].getAttribute('data-goal'), 10);
+      btns[i].setAttribute('aria-pressed', g === state.goal ? 'true' : 'false');
+    }
+  }
+
+  /* ────────────── 설정 모달 ────────────── */
+  function openEditor() {
+    if (refs.maxInput) refs.maxInput.value = String(state.maxNum);
+    updateRangeInfo();
+    updateGoalUI();
+    refs.linkOut.value = buildLink();
+    refs.linkNote.textContent = isFileMode()
+      ? '파일로 연 경우 이 링크는 다른 사람이 열 수 없어요. 같은 설정으로 시작하려면 각자 ⚙️에서 최대 번호와 목표 빙고를 똑같이 맞춰 주세요.'
+      : '이 링크를 받은 사람은 같은 번호 범위와 목표 빙고로 각자 다른 배치의 판을 받습니다.';
+    refs.modal.hidden = false;
+    try { refs.maxInput.focus(); refs.maxInput.select(); } catch (e) {}
+  }
+
+  function closeEditor() {
+    refs.modal.hidden = true;
+    try { refs.maxInput.blur(); } catch (e) {}
+  }
+
+  function updateRangeInfo() {
+    var raw = String(refs.maxInput.value || '').replace(/[^0-9]/g, '').slice(0, 2);
+    if (raw !== refs.maxInput.value) refs.maxInput.value = raw;
+    var n = parseInt(raw, 10);
+    var ok = !isNaN(n) && n >= MIN_MAX && n <= MAX_MAX;
+    if (refs.btnApply) refs.btnApply.disabled = !ok;
+    refs.rangeInfo.textContent = ok ? ('1 ~ ' + n + ' 에서 25개') : '최대 번호를 입력하세요';
+    refs.rangeWarn.textContent = ok ? '' : (MIN_MAX + ' ~ ' + MAX_MAX + ' 사이');
+  }
+
+  function editorMax() {
+    var n = parseInt(String(refs.maxInput.value || '').replace(/[^0-9]/g, ''), 10);
+    return isNaN(n) ? state.maxNum : clampMax(n);
+  }
+
+  function nudgeMax(d) {
+    var n = editorMax() + d;
+    if (n < MIN_MAX) n = MIN_MAX;
+    if (n > MAX_MAX) n = MAX_MAX;
+    refs.maxInput.value = String(n);
+    updateRangeInfo();
+    refs.linkOut.value = buildLink(n);
+  }
+
+  function isFileMode() {
+    var p = String((window.location && window.location.protocol) || '');
+    return p === 'file:' || p === '';
+  }
+
+  function buildLink(maxNum, goal) {
+    var n = maxNum ? clampMax(maxNum) : state.maxNum;
+    var g = (goal === 2 || goal === 3) ? goal : state.goal;
+    var base = String((window.location && window.location.href) || '').split('#')[0];
+    /* 기본값(3빙고)은 짧게 #n=25, 2빙고는 #n=25&g=2 */
+    return base + '#n=' + n + (g === 3 ? '' : '&g=' + g);
+  }
+
+  function copyText(text, okMsg, failField) {
+    var done = function () { toast(okMsg, '톡·문자에 그대로 붙여 넣으세요'); };
+    var fail = function () {
+      if (failField) {
+        try { failField.focus(); if (failField.select) failField.select(); } catch (e) {}
+      }
+      toast('복사가 안 되면 길게 눌러 복사해 주세요', '아래 칸에 그대로 들어 있어요');
+    };
+    if (window.navigator && window.navigator.clipboard && window.navigator.clipboard.writeText) {
+      try {
+        window.navigator.clipboard.writeText(text).then(done, function () { legacyCopy(text, done, fail); });
+        return;
+      } catch (e) {}
+    }
+    legacyCopy(text, done, fail);
+  }
+
+  function legacyCopy(text, done, fail) {
+    try {
+      var ta = document.createElement('textarea');
+      ta.value = text;
+      ta.setAttribute('readonly', '');
+      ta.style.position = 'fixed';
+      ta.style.top = '-1000px';
+      ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.select();
+      if (ta.setSelectionRange) ta.setSelectionRange(0, text.length);
+      var ok = false;
+      if (document.execCommand) ok = document.execCommand('copy');
+      document.body.removeChild(ta);
+      if (ok) done(); else fail();
+    } catch (e) { fail(); }
+  }
+
+  /* ────────────── 초기화 ────────────── */
+  function bind() {
+    refs.btnEdit.addEventListener('click', openEditor);
+    refs.btnCloseEdit.addEventListener('click', closeEditor);
+    refs.modal.addEventListener('click', function (ev) {
+      if (ev.target === refs.modal) closeEditor();
+    });
+
+    refs.maxInput.addEventListener('input', function () {
+      updateRangeInfo();
+      refs.linkOut.value = buildLink(editorMax());
+    });
+    refs.btnMaxMinus.addEventListener('click', function () { nudgeMax(-1); });
+    refs.btnMaxPlus.addEventListener('click', function () { nudgeMax(1); });
+
+    refs.btnApply.addEventListener('click', function () {
+      var n = editorMax();
+      if (n < MIN_MAX || n > MAX_MAX) { updateRangeInfo(); return; }
+      if (isLocked()) {
+        if (n === state.maxNum) {
+          closeEditor();
+          toast('지금 판과 범위가 같아요', '진행 중인 판은 그대로 두었습니다 · 새로 섞으려면 체크를 모두 해제하세요');
+          return;
+        }
+        if (!window.confirm('체크한 ' + state.marks.length + '칸이 모두 지워지고 새 판이 만들어집니다.\n계속할까요?')) return;
+      }
+      applyMax(n, false, true);
+      closeEditor();
+    });
+
+    if (refs.btnClearMarks) refs.btnClearMarks.addEventListener('click', clearMarks);
+
+    refs.btnCopyLink.addEventListener('click', function () {
+      var link = buildLink(editorMax());
+      refs.linkOut.value = link;
+      copyText(link, '공유 링크를 복사했어요', refs.linkOut);
+    });
+
+    refs.btnResetMax.addEventListener('click', function () {
+      refs.maxInput.value = String(DEFAULT_MAX);
+      updateRangeInfo();
+      refs.linkOut.value = buildLink(DEFAULT_MAX);
+      toast('기본 범위 1~' + DEFAULT_MAX + '번으로 되돌렸어요', '"적용하고 섞기"를 눌러 반영하세요');
+    });
+
+    refs.btnShuffle.addEventListener('click', reshuffle);
+
+    if (refs.goalSeg) {
+      refs.goalSeg.addEventListener('click', function (ev) {
+        var t = ev.target;
+        while (t && t !== refs.goalSeg && !t.getAttribute) t = t.parentNode;
+        if (!t || t === refs.goalSeg) return;
+        var g = parseInt(t.getAttribute('data-goal'), 10);
+        if (g !== 2 && g !== 3) return;
+        if (g === state.goal) return;
+        applyGoal(g, false);
+        refs.linkOut.value = buildLink(editorMax());
+      });
+    }
+
+    refs.btnHelp.addEventListener('click', function () { refs.helpModal.hidden = false; });
+    refs.btnCloseHelp.addEventListener('click', function () { refs.helpModal.hidden = true; });
+    refs.btnHelpOk.addEventListener('click', function () { refs.helpModal.hidden = true; });
+    refs.helpModal.addEventListener('click', function (ev) {
+      if (ev.target === refs.helpModal) refs.helpModal.hidden = true;
+    });
+
+    refs.toast.addEventListener('click', function () {
+      refs.toast.classList.remove('show');
+      refs.toast.hidden = true;
+    });
+
+    window.addEventListener('resize', function () {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(fitBoard, 120);
+    });
+    window.addEventListener('orientationchange', function () {
+      setTimeout(fitBoard, 320);
+    });
+    window.addEventListener('hashchange', function () {
+      var h = readHash();
+      if (!h) return;
+      var changed = false, kept = false;
+      if (h.goal && h.goal !== state.goal) { applyGoal(h.goal, true); changed = true; }
+      /* 체크된 칸이 있으면 새 범위를 적용하지 않고 지금 판을 지킨다 */
+      if (h.maxNum && h.maxNum !== state.maxNum) {
+        if (isLocked()) kept = true;
+        else if (applyMax(h.maxNum, true)) changed = true;
+      }
+      if (kept) toast('진행 중인 판을 그대로 두었어요', '번호 범위를 바꾸려면 먼저 체크를 모두 해제해 주세요');
+      else if (changed) toast('공유 링크의 설정을 적용했어요', rangeLabel() + ' · ' + state.goal + '빙고');
+    });
+    document.addEventListener('keydown', function (ev) {
+      var k = ev.key;
+      if (k === 'Escape') {
+        if (!refs.modal.hidden) closeEditor();
+        else if (!refs.helpModal.hidden) refs.helpModal.hidden = true;
+      }
+      if ((k === 'r' || k === 'R') && refs.modal.hidden && refs.helpModal.hidden) reshuffle();
+    });
+  }
+
+  function init() {
+    refs.board = byId('board');
+    refs.stage = byId('stage');
+    refs.badge = byId('badge');
+    refs.bingoNum = byId('bingoNum');
+    refs.dots = byId('dots');
+    refs.setCode = byId('setCode');
+    refs.goalTot = byId('bingoGoal');
+    refs.goalSeg = byId('goalSeg');
+    refs.btnEdit = byId('btnEdit');
+    refs.btnShuffle = byId('btnShuffle');
+    refs.btnClearMarks = byId('btnClearMarks');
+    refs.btnHelp = byId('btnHelp');
+    refs.modal = byId('modal');
+    refs.btnCloseEdit = byId('btnCloseEdit');
+    refs.maxInput = byId('maxInput');
+    refs.rangeInfo = byId('rangeInfo');
+    refs.rangeWarn = byId('rangeWarn');
+    refs.btnMaxMinus = byId('btnMaxMinus');
+    refs.btnMaxPlus = byId('btnMaxPlus');
+    refs.btnApply = byId('btnApply');
+    refs.btnCopyLink = byId('btnCopyLink');
+    refs.btnResetMax = byId('btnResetMax');
+    refs.linkOut = byId('linkOut');
+    refs.linkNote = byId('linkNote');
+    refs.helpModal = byId('helpModal');
+    refs.btnCloseHelp = byId('btnCloseHelp');
+    refs.btnHelpOk = byId('btnHelpOk');
+    refs.toast = byId('toast');
+    refs.toastMain = byId('toastMain');
+    refs.toastSub = byId('toastSub');
+    refs.fx = byId('fx');
+
+    var saved = loadSaved();
+    var hash = readHash();
+
+    /* 저장된 판이 유효한지(25칸 모두 범위 안의 서로 다른 숫자) 먼저 검사한다 */
+    var savedOk = false;
+    var savedMax = DEFAULT_MAX;
+    if (saved && saved.board && saved.board.length === CELLS) {
+      savedMax = clampMax(saved.maxNum || DEFAULT_MAX);
+      savedOk = true;
+      var seenSaved = {};
+      for (var si = 0; si < CELLS; si++) {
+        var sv = saved.board[si];
+        if (typeof sv !== 'number' || sv < 1 || sv > savedMax || seenSaved[sv]) { savedOk = false; break; }
+        seenSaved[sv] = 1;
+      }
+    }
+    var savedMarks = (savedOk && saved.marks && saved.marks.length) ? saved.marks.filter(function (n) {
+      return typeof n === 'number' && n >= 0 && n < CELLS;
+    }) : [];
+    /* 이미 체크한 칸이 있으면 (= 진행 중인 판) 새로고침·링크 재방문이어도 그 판을 이어간다 */
+    var preserve = savedOk && savedMarks.length > 0;
+    var keptRange = preserve && hash && hash.maxNum && hash.maxNum !== savedMax;
+
+    var maxNum = DEFAULT_MAX;
+    if (preserve) maxNum = savedMax;
+    else if (hash && hash.maxNum) maxNum = hash.maxNum;
+    else if (savedOk) maxNum = savedMax;
+    state.maxNum = maxNum;
+
+    var goal = DEFAULT_GOAL;
+    if (hash && hash.goal) goal = hash.goal;
+    else if (saved && (saved.goal === 2 || saved.goal === 3)) goal = saved.goal;
+    state.goal = goal;
+
+    renderDots();
+    updateGoalUI();
+    updateSetCode();
+
+    var restore = false;
+    if (savedOk && savedMax === maxNum) {
+      restore = true;
+    }
+
+    if (restore) {
+      state.board = saved.board.slice();
+      state.marks = (saved.marks || []).filter(function (n) {
+        return typeof n === 'number' && n >= 0 && n < CELLS;
+      });
+      state.celebrated = (saved.celebrated || []).filter(function (n) {
+        return typeof n === 'number' && n >= 1 && n <= state.goal;
+      });
+    } else {
+      state.board = makeBoard(maxNum);
+      state.marks = [];
+      state.celebrated = [];
+    }
+
+    renderBoard();
+    updateLines();
+    bind();
+    save();
+
+    if (keptRange) {
+      setTimeout(function () {
+        toast('진행 중이던 판을 이어서 불러왔어요', '체크 ' + state.marks.length + '칸 · 새로고침해도 판이 유지됩니다');
+      }, 500);
+    }
+
+    setTimeout(fitBoard, 60);
+    setTimeout(fitBoard, 350);
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+})();
+</script>
+</body>
+</html>

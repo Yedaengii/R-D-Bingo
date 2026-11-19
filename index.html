@@ -136,6 +136,13 @@
     touch-action:manipulation;appearance:none;-webkit-appearance:none;
   }
   .shuffle:active{background:rgba(255,255,255,.15)}
+  .shuffle.locked{
+    color:#8FA0B8;background:rgba(255,255,255,.03);border-color:rgba(255,255,255,.08);
+    box-shadow:none;cursor:default;
+  }
+  .shuffle.locked:active{background:rgba(255,255,255,.06)}
+  .shuffle.lockhint{animation:lockNudge .36s ease}
+  @keyframes lockNudge{0%{transform:translateX(0)}25%{transform:translateX(-3px)}55%{transform:translateX(3px)}80%{transform:translateX(-2px)}100%{transform:translateX(0)}}
   .linkbtn{
     border:0;background:transparent;color:#8FA0B8;font-family:inherit;
     font-size:11.5px;font-weight:700;padding:8px 4px;line-height:1;
@@ -325,6 +332,7 @@
     <div class="m-actions">
       <button class="btn primary" id="btnApply" type="button">적용하고 섞기</button>
       <button class="btn wide" id="btnCopyLink" type="button">🔗 공유 링크 복사</button>
+      <button class="btn ghost" id="btnClearMarks" type="button" hidden>🧽 체크 모두 해제 (고정 풀기)</button>
       <button class="btn ghost" id="btnResetMax" type="button">기본값(25)으로</button>
     </div>
     <div class="m-share">
@@ -347,7 +355,7 @@
       <li>사회자가 번호를 부르면 해당 칸을 <b>터치</b>해 체크하세요. 다시 누르면 해제됩니다.</li>
       <li>가로·세로·대각선 <b>5칸</b>을 완성하면 <b>1빙고</b>, 먼저 목표 빙고를 달성하면 <b>손을 들어 주세요</b> — <b>우승자가 나온 테이블 전원 승리!</b></li>
     </ol>
-    <p class="m-desc">목표 빙고(<b>2빙고 / 3빙고</b>)는 <b>⚙️</b>에서 바꿀 수 있고, 아래쪽 <b>1~N번</b> 표시가 같으면 같은 범위로 진행 중이에요.</p>
+    <p class="m-desc">목표 빙고(<b>2빙고 / 3빙고</b>)는 <b>⚙️</b>에서 바꿀 수 있고, 아래쪽 <b>1~N번</b> 표시가 같으면 같은 범위로 진행 중이에요.<br>첫 칸을 체크하면 판이 <b>자동으로 고정</b>돼요. 그때부터는 새로고침해도 판과 체크가 그대로 남고 <b>새 판 섞기</b>가 잠깁니다. 다시 섞으려면 ⚙️의 <b>체크 모두 해제</b>로 고정을 풀어 주세요.</p>
     <button class="btn primary" id="btnHelpOk" type="button">확인</button>
   </div>
 </div>
@@ -390,6 +398,7 @@
   var resizeTimer = 0;
   var toastTimer = 0;
   var toastHideTimer = 0;
+  var saveWarned = false;
 
   /* ────────────── 유틸 ────────────── */
   function byId(id) { return document.getElementById(id); }
@@ -461,7 +470,17 @@
         marks: state.marks,
         celebrated: state.celebrated
       }));
-    } catch (e) { /* 사생활 보호 모드 등 */ }
+      return true;
+    } catch (e) {
+      /* 사생활 보호 모드 등: 저장이 안 되면 새로고침 시 판이 사라지므로 한 번만 미리 알린다 */
+      if (!saveWarned) {
+        saveWarned = true;
+        setTimeout(function () {
+          toast('이 브라우저엔 판이 저장되지 않아요', '시크릿·사생활 보호 모드에서는 새로고침하면 체크가 지워집니다');
+        }, 500);
+      }
+      return false;
+    }
   }
 
   /* ────────────── 그리기 ────────────── */
@@ -501,6 +520,54 @@
       btn.classList.toggle('on', on);
       btn.setAttribute('aria-pressed', on ? 'true' : 'false');
     }
+    updateLockUI();
+  }
+
+  /* ────────────── 판 고정 (첫 칸 체크 ~ 모두 해제) ────────────── */
+  function isLocked() { return state.marks.length > 0; }
+
+  function updateLockUI() {
+    var locked = isLocked();
+    if (refs.btnShuffle) {
+      refs.btnShuffle.classList.toggle('locked', locked);
+      refs.btnShuffle.setAttribute('aria-disabled', locked ? 'true' : 'false');
+      refs.btnShuffle.textContent = locked ? '🔒 판 고정됨' : '🔄 새 판 섞기';
+      refs.btnShuffle.setAttribute('title', locked
+        ? '체크한 칸이 있어 판이 고정되어 있어요. 모두 해제하면 다시 섞을 수 있어요.'
+        : '새 판을 섞습니다');
+    }
+    if (refs.btnClearMarks) {
+      if (locked) {
+        refs.btnClearMarks.removeAttribute('hidden');
+        refs.btnClearMarks.textContent = '🧽 체크 ' + state.marks.length + '칸 모두 해제 (고정 풀기)';
+      } else {
+        refs.btnClearMarks.setAttribute('hidden', '');
+      }
+    }
+    updateSetCode();
+  }
+
+  function lockNotice() {
+    toast('판이 고정되어 있어요', '체크 ' + state.marks.length + '칸을 모두 해제하면 새 판을 섞을 수 있어요');
+    if (refs.btnShuffle) {
+      refs.btnShuffle.classList.remove('lockhint');
+      void refs.btnShuffle.offsetWidth;
+      refs.btnShuffle.classList.add('lockhint');
+    }
+    buzz(8);
+  }
+
+  function clearMarks() {
+    if (!isLocked()) return;
+    var n = state.marks.length;
+    if (!window.confirm('체크한 ' + n + '칸을 모두 해제할까요?\n번호 배치는 그대로 남습니다.')) return;
+    state.marks = [];
+    state.celebrated = [];
+    state.count = 0;
+    paintMarks();
+    updateLines();
+    save();
+    toast('체크를 모두 해제했어요', '번호 판은 그대로 · 이제 새 판을 섞을 수 있어요');
   }
 
   function fitBoard() {
@@ -743,6 +810,7 @@
 
   /* ────────────── 새 판 / 범위·목표 적용 ────────────── */
   function reshuffle() {
+    if (isLocked()) { lockNotice(); return; }
     if (!window.confirm('새 판을 섞을까요?\n체크한 칸이 모두 지워집니다.')) return;
     state.marks = [];
     state.celebrated = [];
@@ -755,8 +823,9 @@
     toast('새 판 준비 완료', rangeLabel() + '에서 25개를 다시 뽑았어요');
   }
 
-  function applyMax(maxNum, silent) {
+  function applyMax(maxNum, silent, force) {
     var n = clampMax(maxNum);
+    if (isLocked() && !force) return false;
     state.maxNum = n;
     state.marks = [];
     state.celebrated = [];
@@ -789,7 +858,7 @@
   }
 
   function updateSetCode() {
-    if (refs.setCode) refs.setCode.textContent = rangeLabel() + ' · ' + state.goal + '빙고';
+    if (refs.setCode) refs.setCode.textContent = rangeLabel() + ' · ' + state.goal + '빙고' + (isLocked() ? ' · 🔒' : '');
   }
 
   function updateGoalUI() {
@@ -909,9 +978,19 @@
     refs.btnApply.addEventListener('click', function () {
       var n = editorMax();
       if (n < MIN_MAX || n > MAX_MAX) { updateRangeInfo(); return; }
-      applyMax(n, false);
+      if (isLocked()) {
+        if (n === state.maxNum) {
+          closeEditor();
+          toast('지금 판과 범위가 같아요', '진행 중인 판은 그대로 두었습니다 · 새로 섞으려면 체크를 모두 해제하세요');
+          return;
+        }
+        if (!window.confirm('체크한 ' + state.marks.length + '칸이 모두 지워지고 새 판이 만들어집니다.\n계속할까요?')) return;
+      }
+      applyMax(n, false, true);
       closeEditor();
     });
+
+    if (refs.btnClearMarks) refs.btnClearMarks.addEventListener('click', clearMarks);
 
     refs.btnCopyLink.addEventListener('click', function () {
       var link = buildLink(editorMax());
@@ -963,13 +1042,15 @@
     window.addEventListener('hashchange', function () {
       var h = readHash();
       if (!h) return;
-      var changed = false;
+      var changed = false, kept = false;
       if (h.goal && h.goal !== state.goal) { applyGoal(h.goal, true); changed = true; }
+      /* 체크된 칸이 있으면 새 범위를 적용하지 않고 지금 판을 지킨다 */
       if (h.maxNum && h.maxNum !== state.maxNum) {
-        applyMax(h.maxNum, true);
-        changed = true;
+        if (isLocked()) kept = true;
+        else if (applyMax(h.maxNum, true)) changed = true;
       }
-      if (changed) toast('공유 링크의 설정을 적용했어요', rangeLabel() + ' · ' + state.goal + '빙고');
+      if (kept) toast('진행 중인 판을 그대로 두었어요', '번호 범위를 바꾸려면 먼저 체크를 모두 해제해 주세요');
+      else if (changed) toast('공유 링크의 설정을 적용했어요', rangeLabel() + ' · ' + state.goal + '빙고');
     });
     document.addEventListener('keydown', function (ev) {
       var k = ev.key;
@@ -992,6 +1073,7 @@
     refs.goalSeg = byId('goalSeg');
     refs.btnEdit = byId('btnEdit');
     refs.btnShuffle = byId('btnShuffle');
+    refs.btnClearMarks = byId('btnClearMarks');
     refs.btnHelp = byId('btnHelp');
     refs.modal = byId('modal');
     refs.btnCloseEdit = byId('btnCloseEdit');
@@ -1016,9 +1098,30 @@
     var saved = loadSaved();
     var hash = readHash();
 
+    /* 저장된 판이 유효한지(25칸 모두 범위 안의 서로 다른 숫자) 먼저 검사한다 */
+    var savedOk = false;
+    var savedMax = DEFAULT_MAX;
+    if (saved && saved.board && saved.board.length === CELLS) {
+      savedMax = clampMax(saved.maxNum || DEFAULT_MAX);
+      savedOk = true;
+      var seenSaved = {};
+      for (var si = 0; si < CELLS; si++) {
+        var sv = saved.board[si];
+        if (typeof sv !== 'number' || sv < 1 || sv > savedMax || seenSaved[sv]) { savedOk = false; break; }
+        seenSaved[sv] = 1;
+      }
+    }
+    var savedMarks = (savedOk && saved.marks && saved.marks.length) ? saved.marks.filter(function (n) {
+      return typeof n === 'number' && n >= 0 && n < CELLS;
+    }) : [];
+    /* 이미 체크한 칸이 있으면 (= 진행 중인 판) 새로고침·링크 재방문이어도 그 판을 이어간다 */
+    var preserve = savedOk && savedMarks.length > 0;
+    var keptRange = preserve && hash && hash.maxNum && hash.maxNum !== savedMax;
+
     var maxNum = DEFAULT_MAX;
-    if (hash && hash.maxNum) maxNum = hash.maxNum;
-    else if (saved && saved.maxNum) maxNum = clampMax(saved.maxNum);
+    if (preserve) maxNum = savedMax;
+    else if (hash && hash.maxNum) maxNum = hash.maxNum;
+    else if (savedOk) maxNum = savedMax;
     state.maxNum = maxNum;
 
     var goal = DEFAULT_GOAL;
@@ -1030,16 +1133,9 @@
     updateGoalUI();
     updateSetCode();
 
-    /* 저장된 판 복원: 범위가 같고, 25칸이 모두 범위 안의 서로 다른 숫자일 때만 */
     var restore = false;
-    if (saved && saved.maxNum === maxNum && saved.board && saved.board.length === CELLS) {
+    if (savedOk && savedMax === maxNum) {
       restore = true;
-      var seen = {};
-      for (var i = 0; i < CELLS; i++) {
-        var v = saved.board[i];
-        if (typeof v !== 'number' || v < 1 || v > maxNum || seen[v]) { restore = false; break; }
-        seen[v] = 1;
-      }
     }
 
     if (restore) {
@@ -1060,6 +1156,12 @@
     updateLines();
     bind();
     save();
+
+    if (keptRange) {
+      setTimeout(function () {
+        toast('진행 중이던 판을 이어서 불러왔어요', '체크 ' + state.marks.length + '칸 · 새로고침해도 판이 유지됩니다');
+      }, 500);
+    }
 
     setTimeout(fitBoard, 60);
     setTimeout(fitBoard, 350);
